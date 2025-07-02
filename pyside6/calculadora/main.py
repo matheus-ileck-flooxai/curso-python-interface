@@ -32,16 +32,7 @@ if __name__ == '__main__':
     window.vLayout.addLayout(buttonsGrid)
 
     # Botao
-    buttonsGrid.addWidget(Button('7'), 0, 0)
-    buttonsGrid.addWidget(Button('8'), 0, 1)
-    buttonsGrid.addWidget(Button('9'), 0, 2)
-    buttonsGrid.addWidget(Button('4'), 1, 0)
-    buttonsGrid.addWidget(Button('5'), 1, 1)
-    buttonsGrid.addWidget(Button('6'), 1, 2)
-    buttonsGrid.addWidget(Button('1'), 2, 0)
-    buttonsGrid.addWidget(Button('2'), 2, 1)
-    buttonsGrid.addWidget(Button('3'), 2, 2)
-    buttonsGrid.addWidget(Button('0'), 3, 0, 1,3)
+ 
     
 
     # Define um tamanho Fixo da janela
