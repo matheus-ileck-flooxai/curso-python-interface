@@ -35,8 +35,13 @@ class ButtonsGrid(QGridLayout):
         ]
         self.display = display
         self.info = info
-        self.info.setText('Sua conta')
         self._equation = ''
+        self._equationInitialValue = 'Sua conta'
+        self._left = None
+        self._right = None
+        self._op = None
+
+        self.equation = self._equationInitialValue
         self._makegrid()
 
     @property
@@ -73,6 +78,15 @@ class ButtonsGrid(QGridLayout):
         if text == 'C':
             self._connectButtonClicked(button, self._clear)
 
+        if text in '+-/*':
+            self._connectButtonClicked(
+                button, 
+                self._makeSlot(self._operatorClicked, button)
+                )
+
+        if text in '=':
+            self._connectButtonClicked(button, self._eq)
+
 
     def _makeSlot(self, func, *args, **kwargs):
         @Slot(bool)
@@ -90,4 +104,44 @@ class ButtonsGrid(QGridLayout):
         self.display.insert(buttonText)
 
     def _clear(self):
+        self._left = None
+        self._right = None
+        self._op = None
+        self.equation = self._equationInitialValue
         self.display.clear()
+
+    def _operatorClicked(self, button):
+        buttonText = button.text()
+        displayText = self.display.text()
+        self.display.clear()
+
+        if not isValidNumber(displayText) and self._left is None:
+            print('Não tem nada para colocar no valor da esquerda')
+            return 
+        
+        if self._left is None:
+            self._left = float(displayText)
+
+        self._op = buttonText
+        self.equation = f'{self._left} {self._op} ??'
+    
+    def _eq(self):
+        displayText = self.display.text()
+
+        if not isValidNumber(displayText):
+            print('Sem nada para a direita')
+            return
+        
+        self._right = float(displayText)
+        self.equation = f'{self._left} {self._op} {self._right}'
+        result = 0.0
+        
+        try:
+            result = eval(self.equation)
+        except ZeroDivisionError:
+            print('Zero division error')
+
+        self.display.clear()
+        self.info.setText(f'{self.equation} = {result}')
+        self._left = result
+        self._right = None
