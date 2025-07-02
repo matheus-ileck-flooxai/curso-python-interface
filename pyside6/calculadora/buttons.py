@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QPushButton, QGridLayout
-from display import Display
 from PySide6.QtCore import Slot
 from variables import MEDIUM_FONT_SIZE
-from utils import isNumOrDot, isEmpty
+from utils import isNumOrDot, isEmpty, isValidNumber
+
+if TYPE_CHECKING:
+    from display import Display
+    from info import Info
+
 
 class Button(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -14,12 +19,11 @@ class Button(QPushButton):
         font.setPixelSize(MEDIUM_FONT_SIZE)
         self.setFont(font)
         self.setMinimumSize(75, 75)
-        self.setCheckable(True)
 
 
 
 class ButtonsGrid(QGridLayout):
-    def __init__(self, display: Display, *args, **kwargs):
+    def __init__(self, display: 'Display', info: 'Info',*args, **kwargs):
         super().__init__(*args,**kwargs)
 
         self._grid_mask = [
@@ -30,7 +34,20 @@ class ButtonsGrid(QGridLayout):
             ['', '0', '.', '='],
         ]
         self.display = display
+        self.info = info
+        self.info.setText('Sua conta')
+        self._equation = ''
         self._makegrid()
+
+    @property
+    def equation(self):
+        return self._equation
+    
+    @equation.setter
+    def equation(self, value):
+        self._equation = value
+        self.info.setText(value)
+
 
     def _makegrid(self):
         for row_number, row_data in enumerate(self._grid_mask):
@@ -54,5 +71,10 @@ class ButtonsGrid(QGridLayout):
         return realSlot
 
     def _insertButtonTextToDisplay(self, button):
-        button_text = button.text()
-        self.display.insert(button_text)
+        buttonText = button.text()
+        newDisplayValue = self.display.text() + buttonText
+
+        if not isValidNumber(newDisplayValue):
+            return
+        
+        self.display.insert(buttonText)
