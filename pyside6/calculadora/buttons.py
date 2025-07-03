@@ -63,7 +63,7 @@ class ButtonsGrid(QGridLayout):
 
     def _makegrid(self):
         self.display.eqPressed.connect(self._eq)
-        self.display.delPressed.connect(self.display.backspace)
+        self.display.delPressed.connect(self._backspace)
         self.display.clearPressed.connect(self._clear)
         self.display.inputPressed.connect(self._insertToDisplay)
         self.display.operatorPressed.connect(self._configLeftOp)
@@ -135,6 +135,8 @@ class ButtonsGrid(QGridLayout):
             return
         
         self.display.insert(text)
+        self.display.setFocus()
+
 
     @Slot()
     def _clear(self):
@@ -143,11 +145,14 @@ class ButtonsGrid(QGridLayout):
         self._op = None
         self.equation = self._equationInitialValue
         self.display.clear()
+        self.display.setFocus()
+
 
     @Slot()
     def _configLeftOp(self, text):
         displayText = self.display.text()
         self.display.clear()
+        self.display.setFocus()
 
         if not isValidNumber(displayText) and self._left is None:
             self._showError('Você não digitou nada')
@@ -164,7 +169,7 @@ class ButtonsGrid(QGridLayout):
     def _eq(self):
         displayText = self.display.text()
 
-        if not isValidNumber(displayText):
+        if not isValidNumber(displayText) or self._left is None:
             self._showError('Conta incomplenta')
             return
         
@@ -173,7 +178,7 @@ class ButtonsGrid(QGridLayout):
         result = 'ERROR'
         
         try:
-            if '^' in self.equation and isinstance(self._left, float):
+            if '^' in self.equation and isinstance(self._left, (int,float)):
                 result = pow(self._left, self._right)
             else:
                 result = eval(self.equation)
@@ -190,9 +195,16 @@ class ButtonsGrid(QGridLayout):
         self.info.setText(f'{self.equation} = {result}')
         self._left = result
         self._right = None
+        self.display.setFocus()
 
         if result == 'ERROR':
             self._left = None
+
+
+    @Slot()
+    def _backspace(self):
+        self.display.backspace()
+        self.display.setFocus()
 
     def _makeDialog(self,text):
         msgBox = self.window.makeMsgBox()
@@ -203,9 +215,13 @@ class ButtonsGrid(QGridLayout):
         msgBox = self._makeDialog(text)
         msgBox.setIcon(msgBox.Icon.Critical)
         msgBox.exec()
+        self.display.setFocus()
+
     
     def _showInfo(self, text):
         msgBox = self._makeDialog(text)
         msgBox.setIcon(msgBox.Icon.information)
         msgBox.exec()
+        self.display.setFocus()
+
 
